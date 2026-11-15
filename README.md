@@ -1,5 +1,7 @@
 # Triage Desk
 
+**[Live demo](https://rexg17.github.io/ticket-triage/)** · [Night shift](https://rexg17.github.io/ticket-triage/?theme=night) · [Source](https://github.com/rexg17/ticket-triage)
+
 A human-in-the-loop assistant that turns a raw support ticket into a **draft N2 escalation note**. It reads the ticket, notices what matters, asks for what is missing, and then waits for a person to read, edit and approve. Nothing is escalated without that approval.
 
 ![Triage Desk, day shift](docs/screenshot.png)
