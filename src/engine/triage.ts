@@ -50,8 +50,9 @@ export function extractEvidence(raw: string): string[] {
   for (const match of raw.matchAll(/\bv(?:ersao|ersion|ersión)?\s*\.?\s*(\d+(?:\.\d+){1,3})\b/gi)) {
     evidence.add(`Version: ${match[1]}`);
   }
-  for (const match of raw.matchAll(/\b(?:loja|tienda|store|filial|sucursal)\s*#?\s*(\d{1,5})\b/gi)) {
-    evidence.add(`Store: ${match[1]}`);
+  // Aceita singular e plural, e listas como "stores 3 and 8" ou "lojas 3, 5 e 9".
+  for (const match of raw.matchAll(/\b(?:lojas?|tiendas?|stores?|filiais|filial|sucursal(?:es)?)\s*#?\s*(\d{1,5}(?:\s*(?:,|e|y|and|&)\s*\d{1,5})*)/gi)) {
+    for (const id of match[1].match(/\d{1,5}/g) ?? []) evidence.add(`Store: ${id}`);
   }
   for (const match of raw.matchAll(/\b(\d{1,2}[:h]\d{2})\b/g)) {
     evidence.add(`Time mentioned: ${match[1]}`);

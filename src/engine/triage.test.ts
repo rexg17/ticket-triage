@@ -26,6 +26,11 @@ describe("extractEvidence", () => {
     expect(evidence).toContain("Store: 12");
   });
 
+  it("finds several stores in one sentence", () => {
+    expect(extractEvidence("Problem in stores 3 and 8")).toEqual(expect.arrayContaining(["Store: 3", "Store: 8"]));
+    expect(extractEvidence("falha nas lojas 3, 5 e 9")).toEqual(expect.arrayContaining(["Store: 3", "Store: 5", "Store: 9"]));
+  });
+
   it("returns nothing for text without evidence", () => {
     expect(extractEvidence("o sistema esta estranho")).toEqual([]);
   });
@@ -66,6 +71,20 @@ describe("triage", () => {
     const draft = triage(sample("T-1045"));
     expect(draft.category.id).toBe("payment");
     expect(draft.tag).toBe("red");
+  });
+
+  it("classifies an integration outage and finds the store and what was tried", () => {
+    const draft = triage(sample("T-1047"));
+    expect(draft.category.id).toBe("integration");
+    expect(draft.evidence).toContain("Store: 3");
+    expect(draft.alreadyTried.join(" ")).toMatch(/restarted/i);
+  });
+
+  it("shows low confidence and many questions for a vague ticket", () => {
+    const draft = triage(sample("T-1048"));
+    expect(draft.category.id).toBe("other");
+    expect(draft.confidence).toBeLessThan(30);
+    expect(draft.missing.length).toBeGreaterThanOrEqual(4);
   });
 
   it("asks for missing information", () => {

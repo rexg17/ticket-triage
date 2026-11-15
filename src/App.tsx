@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { localProvider } from "./ai/provider";
 import { SAMPLES } from "./engine/samples";
 import type { Draft, Tag } from "./engine/types";
@@ -9,7 +9,23 @@ import type { Escalation } from "./ui/history";
 const PRIORITY_TAG: Record<Draft["priority"], Tag> = { P1: "red", P2: "yellow", P3: "green" };
 const TAG_NAME: Record<Tag, string> = { red: "IMMEDIATE", yellow: "URGENT", green: "ROUTINE" };
 
+type Theme = "day" | "night";
+
+function initialTheme(): Theme {
+  // ?theme=night abre direto no turno da noite (útil para links e capturas de tela).
+  const asked = new URLSearchParams(window.location.search).get("theme");
+  if (asked === "day" || asked === "night") return asked;
+  try {
+    const saved = window.localStorage.getItem("triage-desk:theme");
+    if (saved === "day" || saved === "night") return saved;
+  } catch {
+    /* sem armazenamento: segue a preferência do sistema */
+  }
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "night" : "day";
+}
+
 export default function App() {
+  const [theme, setTheme] = useState<Theme>(initialTheme);
   const [text, setText] = useState(SAMPLES[0].text);
   const [activeId, setActiveId] = useState<string | null>(SAMPLES[0].id);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -19,6 +35,15 @@ export default function App() {
   const [approved, setApproved] = useState(false);
   const [copied, setCopied] = useState(false);
   const [history, setHistory] = useState<Escalation[]>(() => loadHistory());
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try {
+      window.localStorage.setItem("triage-desk:theme", theme);
+    } catch {
+      /* o tema vale só para esta visita */
+    }
+  }, [theme]);
 
   // Cada mudança no texto do ticket gera um rascunho novo. As edições da nota valem até o texto mudar.
   useEffect(() => {
@@ -64,7 +89,7 @@ export default function App() {
     setApproved(false);
   }
 
-  async function approve() {
+  const approve = useCallback(async () => {
     if (!draft) return;
     try {
       await navigator.clipboard.writeText(note);
@@ -82,9 +107,38 @@ export default function App() {
       tag,
       note,
     };
-    const next = [entry, ...history];
-    setHistory(next);
-    saveHistory(next);
+    setHistory((current) => {
+      const next = [entry, ...current];
+      saveHistory(next);
+      return next;
+    });
+  }, [draft, note, priority, tag]);
+
+  // Ctrl+Enter (ou Cmd+Enter) aprova de qualquer lugar da tela.
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        event.preventDefault();
+        void approve();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [approve]);
+
+  function download() {
+    const blob = new Blob([note], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `escalation-${(activeId ?? "ticket").toLowerCase()}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function newTicket() {
+    setActiveId(null);
+    setText("");
   }
 
   return (
@@ -94,9 +148,24 @@ export default function App() {
           <p className="kicker">N1 → N2 escalation</p>
           <h1>Triage Desk</h1>
         </div>
-        <p className="oath">
-          The assistant only <em>drafts</em>. Nothing is escalated until a person reads, edits and approves it.
-        </p>
+        <div className="mast-side">
+          <p className="oath">
+            The assistant only <em>drafts</em>. Nothing is escalated until a person reads, edits and approves it.
+          </p>
+          <div className="tools">
+            <button type="button" className="tool" onClick={newTicket}>
+              New ticket
+            </button>
+            <button
+              type="button"
+              className="tool"
+              aria-pressed={theme === "night"}
+              onClick={() => setTheme(theme === "night" ? "day" : "night")}
+            >
+              {theme === "night" ? "Day shift" : "Night shift"}
+            </button>
+          </div>
+        </div>
       </header>
 
       <main className="floor">
@@ -200,8 +269,15 @@ export default function App() {
                 <button type="button" className="approve" onClick={approve}>
                   {approved ? "Approved ✓" : "Approve & copy"}
                 </button>
+                <button type="button" className="ghost" onClick={download}>
+                  Download .txt
+                </button>
                 {copied && <span className="copied">Copied to clipboard</span>}
               </div>
+              <p className="hint">
+                {pendingChecks > 0 ? `${pendingChecks} N1 check${pendingChecks > 1 ? "s" : ""} still open. ` : ""}
+                Shortcut: Ctrl+Enter to approve.
+              </p>
 
               <div className={`stamp ${approved ? "approved" : "draft"}`} aria-live="polite">
                 {approved ? "APPROVED" : "DRAFT"}

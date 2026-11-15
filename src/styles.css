@@ -16,6 +16,25 @@
   --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
   --cond: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
   --type: "Special Elite", "Courier New", monospace;
+  /* cores do que fica direto sobre a mesa (os papéis mantêm a tinta escura nos dois turnos) */
+  --on-desk: #1c1812;
+  --on-desk-soft: #5b5242;
+  --chip-bg: #1c1812;
+  --chip-fg: #f7f1e1;
+  --tick-off: rgba(28, 24, 18, 0.18);
+  --vignette: rgba(60, 40, 10, 0.28);
+}
+
+/* Turno da noite: a mesa escurece, os papéis continuam iluminados como sob uma luminária. */
+:root[data-theme="night"] {
+  --desk: #1f1b14;
+  --desk-dark: #15120d;
+  --on-desk: #f0e6cf;
+  --on-desk-soft: #b8ab8e;
+  --chip-bg: #f0e6cf;
+  --chip-fg: #1c1812;
+  --tick-off: rgba(240, 230, 207, 0.2);
+  --vignette: rgba(0, 0, 0, 0.55);
 }
 
 * {
@@ -24,7 +43,7 @@
 
 body {
   margin: 0;
-  color: var(--ink);
+  color: var(--on-desk);
   font-family: var(--mono);
   font-size: 14px;
   line-height: 1.5;
@@ -33,7 +52,7 @@ body {
   background-image:
     radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.18) 0 1px, transparent 1.5px),
     radial-gradient(circle at 70% 60%, rgba(0, 0, 0, 0.07) 0 1px, transparent 1.5px),
-    radial-gradient(ellipse at center, transparent 55%, rgba(60, 40, 10, 0.28) 100%);
+    radial-gradient(ellipse at center, transparent 55%, var(--vignette) 100%);
   background-size: 14px 14px, 19px 19px, 100% 100%;
   min-height: 100vh;
 }
@@ -70,7 +89,7 @@ h4 {
   align-items: flex-end;
   gap: 24px;
   padding-bottom: 18px;
-  border-bottom: 3px double var(--ink);
+  border-bottom: 3px double var(--on-desk);
   margin-bottom: 26px;
 }
 
@@ -93,11 +112,11 @@ h4 {
   max-width: 340px;
   margin: 0;
   font-size: 13px;
-  color: var(--ink-soft);
+  color: var(--on-desk-soft);
 }
 
 .oath em {
-  color: var(--ink);
+  color: var(--on-desk);
   font-style: normal;
   font-weight: 700;
   border-bottom: 2px solid var(--signal);
@@ -119,7 +138,7 @@ h4 {
 h2 {
   font-size: 15px;
   letter-spacing: 0.22em;
-  color: var(--ink-soft);
+  color: var(--on-desk-soft);
   margin-bottom: 12px;
 }
 
@@ -198,7 +217,7 @@ select:focus-visible {
 .fiction {
   margin: 20px 0 0;
   font-size: 12px;
-  color: var(--ink-soft);
+  color: var(--on-desk-soft);
 }
 
 /* ---------- ficha do caso: papel pautado ---------- */
@@ -224,7 +243,7 @@ select:focus-visible {
 .reading {
   margin-top: 22px;
   padding: 14px 16px 16px;
-  border: 1px dashed var(--ink-soft);
+  border: 1px dashed var(--on-desk-soft);
 }
 
 .reading h3 {
@@ -235,7 +254,7 @@ select:focus-visible {
 .lang {
   margin: 0 0 8px;
   font-size: 12px;
-  color: var(--ink-soft);
+  color: var(--on-desk-soft);
 }
 
 .signals {
@@ -250,8 +269,8 @@ select:focus-visible {
 .signals li {
   padding: 2px 9px;
   font-size: 12px;
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--chip-bg);
+  color: var(--chip-fg);
 }
 
 /* régua de confiança */
@@ -266,7 +285,7 @@ select:focus-visible {
 .gauge-ticks span {
   display: block;
   height: 45%;
-  background: rgba(28, 24, 18, 0.18);
+  background: var(--tick-off);
 }
 
 .gauge-ticks span:nth-child(5n) {
@@ -275,7 +294,7 @@ select:focus-visible {
 
 .gauge-ticks span.on {
   height: 100%;
-  background: var(--ink);
+  background: var(--on-desk);
 }
 
 .gauge-ticks span.on:nth-child(n + 15) {
@@ -289,11 +308,11 @@ select:focus-visible {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--on-desk-soft);
 }
 
 .gauge-label strong {
-  color: var(--ink);
+  color: var(--on-desk);
   font-family: var(--cond);
   font-size: 18px;
   line-height: 1;
@@ -304,8 +323,8 @@ select:focus-visible {
   padding: 40px 20px;
   text-align: center;
   font-family: var(--type);
-  color: var(--ink-soft);
-  border: 2px dashed var(--ink-soft);
+  color: var(--on-desk-soft);
+  border: 2px dashed var(--on-desk-soft);
 }
 
 .tagcard {
@@ -569,7 +588,7 @@ select:focus-visible {
 .ledger {
   margin-top: 44px;
   padding-top: 16px;
-  border-top: 3px double var(--ink);
+  border-top: 3px double var(--on-desk);
 }
 
 .ledger ol {
@@ -647,5 +666,78 @@ select:focus-visible {
   * {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* ---------- papéis mantêm a tinta escura em qualquer turno ---------- */
+.hang,
+.tagcard,
+.ledger li {
+  color: #1c1812;
+}
+
+.ledger .time {
+  color: #5b5242;
+}
+
+/* ---------- ferramentas do cabeçalho ---------- */
+.mast-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.tools {
+  display: flex;
+  gap: 10px;
+}
+
+.tool,
+.ghost {
+  font-family: var(--cond);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  cursor: pointer;
+  color: var(--on-desk);
+  background: transparent;
+  border: 2px solid var(--on-desk);
+}
+
+.tool:hover,
+.tool[aria-pressed="true"] {
+  background: var(--on-desk);
+  color: var(--desk);
+}
+
+.ghost {
+  color: #1c1812;
+  border-color: #1c1812;
+}
+
+.ghost:hover {
+  background: #1c1812;
+  color: var(--paper);
+}
+
+.tool:focus-visible,
+.ghost:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.hint {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: #5b5242;
+  max-width: 62%;
+}
+
+@media (max-width: 1020px) {
+  .mast-side {
+    align-items: flex-start;
   }
 }

@@ -72,6 +72,16 @@ export const CATEGORIES: CategoryRule[] = [
     ],
   },
   {
+    category: { id: "integration", label: "Integration / API / sync" },
+    words: ["integracao", "integracion", "integration", "api", "webhook", "endpoint", "conector", "connector", "marketplace", "sincronizacao", "sincronizacion", "sync", "http 5", "pedidos nao chegam", "orders are not arriving", "no llegan los pedidos"],
+    checks: [
+      "Check the connector or service is running and its last successful run",
+      "Look for the HTTP status and the response body in the integration log",
+      "Check the credentials, token expiry and the endpoint address",
+      "Confirm what changed on either side (deploy, certificate, firewall)",
+    ],
+  },
+  {
     category: { id: "reports", label: "Reports / inventory / data export" },
     words: ["relatorio", "informe", "report", "export", "inventario", "inventory", "estoque", "stock", "planilha", "excel", "dashboard", "total errado", "wrong total", "saldo"],
     checks: [

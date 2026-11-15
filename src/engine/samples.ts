@@ -36,4 +36,15 @@ export const SAMPLES: Sample[] = [
     text:
       "O relatorio de estoque mostra um total errado depois da importacao da planilha de ontem. Faltam cerca de 40 itens. Quando eu exporto para Excel o numero fica diferente do que aparece na tela.",
   },
+  {
+    id: "T-1047",
+    label: "Orders not arriving",
+    text:
+      "Our integration with the delivery marketplace returns HTTP 500 since the 09:15 deploy. Orders are not arriving in the POS for stores 3 and 8. We restarted the connector twice. Version 5.1.0.",
+  },
+  {
+    id: "T-1048",
+    label: "Vague report",
+    text: "The system is acting weird. Please help.",
+  },
 ];
