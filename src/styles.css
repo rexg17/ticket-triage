@@ -1,0 +1,651 @@
+/* Triage Desk: mesa de papel manila, etiquetas de triagem, carimbos e fita de impressora.
+   Identidade: tinta quase preta, vermelho de sinal, e as três cores da etiqueta de pronto-socorro. */
+
+:root {
+  --desk: #d8c79f;
+  --desk-dark: #c4b185;
+  --paper: #f7f1e1;
+  --paper-line: #e6dcc2;
+  --ink: #1c1812;
+  --ink-soft: #5b5242;
+  --signal: #c8261b;
+  --red: #c8261b;
+  --yellow: #e9a800;
+  --green: #2f8f5b;
+  --string: #8a6a38;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --cond: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+  --type: "Special Elite", "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.5;
+  background-color: var(--desk);
+  /* fibra de papel: duas camadas de pontos suaves e uma vinheta */
+  background-image:
+    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.18) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 70% 60%, rgba(0, 0, 0, 0.07) 0 1px, transparent 1.5px),
+    radial-gradient(ellipse at center, transparent 55%, rgba(60, 40, 10, 0.28) 100%);
+  background-size: 14px 14px, 19px 19px, 100% 100%;
+  min-height: 100vh;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--cond);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.desk {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px 24px 56px;
+}
+
+/* ---------- cabeçalho ---------- */
+.masthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  padding-bottom: 18px;
+  border-bottom: 3px double var(--ink);
+  margin-bottom: 26px;
+}
+
+.kicker {
+  margin: 0;
+  font-family: var(--type);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+
+.masthead h1 {
+  font-size: clamp(44px, 7vw, 84px);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+}
+
+.oath {
+  max-width: 340px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.oath em {
+  color: var(--ink);
+  font-style: normal;
+  font-weight: 700;
+  border-bottom: 2px solid var(--signal);
+}
+
+/* ---------- grade principal ---------- */
+.floor {
+  display: grid;
+  grid-template-columns: 230px minmax(280px, 1fr) minmax(340px, 1.15fr);
+  gap: 28px;
+  align-items: start;
+}
+
+/* sem isto, uma lista larga empurra a coluna da grade e causa rolagem lateral */
+.floor > * {
+  min-width: 0;
+}
+
+h2 {
+  font-size: 15px;
+  letter-spacing: 0.22em;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+
+/* ---------- caixa de entrada: etiquetas penduradas ---------- */
+.inbox ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.inbox li {
+  transform: rotate(var(--tilt, 0deg));
+}
+
+.hang {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 24px 14px 12px 16px;
+  background: var(--paper);
+  border: 0;
+  clip-path: polygon(0 14px, 14px 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+  box-shadow: 0 0 0 1px rgba(28, 24, 18, 0.35);
+  filter: drop-shadow(0 3px 0 rgba(60, 40, 10, 0.25));
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.hang:hover {
+  transform: translateY(-2px);
+}
+
+.hang.active {
+  background: #fff9c9;
+  filter: drop-shadow(0 4px 0 var(--signal));
+}
+
+.hang:focus-visible,
+.tagcard button:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.hole {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: var(--desk);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.hang-id {
+  display: block;
+  font-family: var(--type);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--signal);
+}
+
+.hang-label {
+  display: block;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.fiction {
+  margin: 20px 0 0;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* ---------- ficha do caso: papel pautado ---------- */
+.casefile textarea {
+  width: 100%;
+  min-height: 250px;
+  resize: vertical;
+  padding: 18px 18px 18px 54px;
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 28px;
+  color: var(--ink);
+  border: 1px solid rgba(28, 24, 18, 0.4);
+  background-color: var(--paper);
+  /* margem vermelha à esquerda e linhas do caderno */
+  background-image:
+    linear-gradient(90deg, transparent 40px, var(--signal) 40px, var(--signal) 41px, transparent 41px),
+    repeating-linear-gradient(transparent 0 27px, var(--paper-line) 27px 28px);
+  background-attachment: local;
+  box-shadow: 6px 6px 0 rgba(60, 40, 10, 0.22);
+}
+
+.reading {
+  margin-top: 22px;
+  padding: 14px 16px 16px;
+  border: 1px dashed var(--ink-soft);
+}
+
+.reading h3 {
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+
+.lang {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.signals {
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.signals li {
+  padding: 2px 9px;
+  font-size: 12px;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* régua de confiança */
+.gauge-ticks {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 3px;
+  height: 22px;
+  align-items: end;
+}
+
+.gauge-ticks span {
+  display: block;
+  height: 45%;
+  background: rgba(28, 24, 18, 0.18);
+}
+
+.gauge-ticks span:nth-child(5n) {
+  height: 70%;
+}
+
+.gauge-ticks span.on {
+  height: 100%;
+  background: var(--ink);
+}
+
+.gauge-ticks span.on:nth-child(n + 15) {
+  background: var(--signal);
+}
+
+.gauge-label {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.gauge-label strong {
+  color: var(--ink);
+  font-family: var(--cond);
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ---------- veredito: a etiqueta de triagem ---------- */
+.empty {
+  padding: 40px 20px;
+  text-align: center;
+  font-family: var(--type);
+  color: var(--ink-soft);
+  border: 2px dashed var(--ink-soft);
+}
+
+.tagcard {
+  --tone: var(--yellow);
+  position: relative;
+  padding: 44px 24px 26px;
+  background: var(--paper);
+  /* faixa colorida no topo da etiqueta, como nas de pronto-socorro */
+  background-image: linear-gradient(var(--tone), var(--tone));
+  background-size: 100% 84px;
+  background-repeat: no-repeat;
+  clip-path: polygon(0 26px, 26px 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 0 100%);
+  filter: drop-shadow(8px 8px 0 rgba(60, 40, 10, 0.28));
+  border: 1px solid var(--ink);
+}
+
+.tagcard.red {
+  --tone: var(--red);
+  color: var(--ink);
+}
+
+.tagcard.yellow {
+  --tone: var(--yellow);
+}
+
+.tagcard.green {
+  --tone: var(--green);
+}
+
+.string {
+  position: absolute;
+  top: -70px;
+  left: calc(50% - 1px);
+  width: 3px;
+  height: 90px;
+  background: var(--string);
+  transform: rotate(8deg);
+  transform-origin: bottom;
+  z-index: 2;
+}
+
+.hole.big {
+  top: 16px;
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  background: var(--desk);
+  z-index: 3;
+}
+
+.tag-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: -14px 0 24px;
+  color: #fff;
+}
+
+.tag-name {
+  font-family: var(--cond);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+.tagcard.yellow .tag-top {
+  color: var(--ink);
+}
+
+.tagcard.yellow .tag-name {
+  text-shadow: none;
+}
+
+.pri select {
+  font-family: var(--cond);
+  font-weight: 800;
+  font-size: 26px;
+  letter-spacing: 0.06em;
+  padding: 0 8px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  cursor: pointer;
+}
+
+.cat {
+  margin: 0 0 4px;
+  font-family: var(--type);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.tagcard .title {
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  margin-bottom: 18px;
+}
+
+.tagcard h4 {
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.tagcard h4 small {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-soft);
+}
+
+.ask {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  background: #fff3b0;
+  border-left: 5px solid var(--yellow);
+}
+
+.ask ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.checks {
+  margin-bottom: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--ink-soft);
+}
+
+.checks label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 3px 0;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.checks input {
+  accent-color: var(--ink);
+  margin-top: 4px;
+  width: 15px;
+  height: 15px;
+}
+
+.checks input:checked + span {
+  color: var(--ink-soft);
+  text-decoration: line-through;
+}
+
+/* nota como tira de impressora térmica */
+.notebox span {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--cond);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.notebox textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 14px 14px 20px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid rgba(28, 24, 18, 0.35);
+  /* borda serrilhada inferior, como o corte do papel térmico */
+  mask-image: conic-gradient(from -45deg at bottom, transparent, #000 1deg 89deg, transparent 90deg) 50% / 12px 100%;
+  -webkit-mask-image: conic-gradient(from -45deg at bottom, transparent, #000 1deg 89deg, transparent 90deg) 50% / 12px 100%;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.approve {
+  font-family: var(--cond);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 10px 24px;
+  color: var(--paper);
+  background: var(--ink);
+  border: 0;
+  cursor: pointer;
+  box-shadow: 5px 5px 0 var(--signal);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.approve:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 7px 7px 0 var(--signal);
+}
+
+.approve:active {
+  transform: translate(4px, 4px);
+  box-shadow: 1px 1px 0 var(--signal);
+}
+
+.copied {
+  font-size: 12px;
+  color: var(--green);
+  font-weight: 700;
+}
+
+/* carimbos */
+.stamp {
+  position: absolute;
+  bottom: 28px;
+  right: 24px;
+  padding: 2px 14px;
+  font-family: var(--type);
+  font-size: 30px;
+  letter-spacing: 0.14em;
+  border: 4px double currentColor;
+  border-radius: 4px;
+  transform: rotate(-9deg);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.stamp.draft {
+  color: var(--ink-soft);
+}
+
+.stamp.approved {
+  color: var(--green);
+  animation: thud 0.28s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+@keyframes thud {
+  from {
+    transform: rotate(-9deg) scale(2.3);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(-9deg) scale(1);
+    opacity: 0.85;
+  }
+}
+
+/* ---------- registro da sessão ---------- */
+.ledger {
+  margin-top: 44px;
+  padding-top: 16px;
+  border-top: 3px double var(--ink);
+}
+
+.ledger ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.ledger li {
+  display: grid;
+  grid-template-columns: 70px 44px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--paper);
+  border-left: 8px solid var(--tone, var(--yellow));
+}
+
+.ledger li.red {
+  --tone: var(--red);
+}
+
+.ledger li.green {
+  --tone: var(--green);
+}
+
+.ledger .time {
+  font-family: var(--type);
+  color: var(--ink-soft);
+}
+
+.pri-chip {
+  font-family: var(--cond);
+  font-weight: 800;
+  font-size: 18px;
+}
+
+/* ---------- telas menores ---------- */
+@media (max-width: 1020px) {
+  .floor {
+    grid-template-columns: 1fr;
+  }
+
+  /* no celular a caixa de entrada vira uma fileira de etiquetas que rola para o lado */
+  .inbox ul {
+    grid-auto-flow: column;
+    grid-auto-columns: 200px;
+    overflow-x: auto;
+    padding: 6px 4px 18px;
+  }
+
+  .masthead {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .desk {
+    padding: 18px 14px 40px;
+  }
+
+  .tag-name {
+    font-size: 26px;
+  }
+
+  .stamp {
+    font-size: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
